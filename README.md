@@ -1,4 +1,4 @@
-# Express API Project
+# Desafio final curso CI CD
 
 Este proyecto es una API REST simple construida con Express.js que proporciona endpoints para gestionar usuarios.
 
