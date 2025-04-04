@@ -1,0 +1,207 @@
+Lanzada por el usuario Ernesto Diaz
+
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins 
+ in C:\ProgramData\Jenkins\.jenkins\workspace\jenk1
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Clonar Repositorio)
+[Pipeline] echo
+Clonando repositorio...
+[Pipeline] git
+The recommended git tool is: NONE
+No credentials specified
+ > git.exe rev-parse --resolve-git-dir C:\ProgramData\Jenkins\.jenkins\workspace\jenk1\.git # timeout=10
+Fetching changes from the remote Git repository
+ > git.exe config remote.origin.url https://github.com/ErnestoDiazM/desafiofinalcicd.git # timeout=10
+Fetching upstream changes from https://github.com/ErnestoDiazM/desafiofinalcicd.git
+ > git.exe --version # timeout=10
+ > git --version # 'git version 2.48.1.windows.1'
+ > git.exe fetch --tags --force --progress -- https://github.com/ErnestoDiazM/desafiofinalcicd.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git.exe rev-parse "refs/remotes/origin/master^{commit}" # timeout=10
+Checking out Revision 981c13d0d9dce5f70a829561c85298a1d8f33251 (refs/remotes/origin/master)
+ > git.exe config core.sparsecheckout # timeout=10
+ > git.exe checkout -f 981c13d0d9dce5f70a829561c85298a1d8f33251 # timeout=10
+ > git.exe branch -a -v --no-abbrev # timeout=10
+ > git.exe branch -D master # timeout=10
+ > git.exe checkout -b master 981c13d0d9dce5f70a829561c85298a1d8f33251 # timeout=10
+Commit message: "primer commit, punto 1 inicialización g y subir archivos"
+First time build. Skipping changelog.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Crear package.json)
+[Pipeline] echo
+Verificando package.json...
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>if not exist package.json (
+echo Creating package.json  
+ echo {  1>package.json  
+ echo   "name": "ci_pipeline_project",  1>>package.json  
+ echo   "version": "1.0.0",  1>>package.json  
+ echo   "main": "app.js",  1>>package.json  
+ echo   "scripts": {  1>>package.json  
+ echo     "test": "jest"  1>>package.json  
+ echo   },  1>>package.json  
+ echo   "dependencies": {  1>>package.json  
+ echo     "express": "^4.18.2"  1>>package.json  
+ echo   },  1>>package.json  
+ echo   "devDependencies": {  1>>package.json  
+ echo     "jest": "^29.4.1",  1>>package.json  
+ echo     "supertest": "^6.3.3"  1>>package.json  
+ echo   }  1>>package.json  
+ echo }  1>>package.json 
+) 
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Instalar Dependencias)
+[Pipeline] echo
+Instalando dependencias...
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>npm install 
+
+up to date, audited 356 packages in 2s
+
+48 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Iniciar Servidor)
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>if not exist db.json (
+echo Creating db.json  
+ echo {  1>db.json  
+ echo   "users": [  1>>db.json  
+ echo     { "id": 1, "name": "Usuario 1" },  1>>db.json  
+ echo     { "id": 2, "name": "Usuario 2" }  1>>db.json  
+ echo   ]  1>>db.json  
+ echo }  1>>db.json 
+) 
+Creating db.json
+[Pipeline] echo
+Iniciando servidor...
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>start /b npx json-server --watch db.json --port 3000 
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>ping -n 6 127.0.0.1  1>nul 
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>powershell -command "try { Invoke-WebRequest -Uri http://localhost:3000/users -UseBasicParsing } catch { echo 'Error: El servidor no responde' }" 
+
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : [
+                      {
+                        "id": "1",
+                        "name": "Usuario 1"
+                      },
+                      {
+                        "id": "2",
+                        "name": "Usuario 2"
+                      }
+                    ]
+RawContent        : HTTP/1.1 200 OK
+                    Access-Control-Allow-Origin: *
+                    Access-Control-Allow-Methods: GET, HEAD, PUT, PATCH, POST, DELETE
+                    Access-Control-Allow-Headers: content-type
+                    Connection: keep-alive
+                    Keep-Alive: time...
+Forms             : 
+Headers           : {[Access-Control-Allow-Origin, *], [Access-Control-Allow-Methods, GET, HEAD, PUT, PATCH, POST, 
+                    DELETE], [Access-Control-Allow-Headers, content-type], [Connection, keep-alive]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : 
+RawContentLength  : 98
+
+
+
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>powershell -command "try { Get-Process -Name node | Where-Object {$_.CommandLine -like '*json-server*'} | Stop-Process } catch { echo 'No hay instancias de json-server para terminar' }" 
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Ejecutar Pruebas)
+[Pipeline] echo
+Ejecutando pruebas...
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>npm test   || echo "Las pruebas fallaron pero continuamos" 
+
+> ci_pipeline_project@1.0.0 test
+> jest
+
+jest-haste-map: Haste module naming collision: ci_pipeline_project
+  The following files share their name; please adjust your hasteImpl:
+    * <rootDir>\package.json
+    * <rootDir>\Apoyo Prueba - Implementacio╠ün de un pipeline de integracio╠ün continua\package.json
+
+PASS Apoyo Prueba - Implementacio╠ün de un pipeline de integracio╠ün continua\tests\app.test.js
+  API Tests
+    √ should return a list of users (30 ms)
+    √ should return a single user (8 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        1.584 s
+Ran all test suites.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Generar Reporte)
+[Pipeline] echo
+Generando reporte detallado...
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>echo # Reporte de Pruebas  1>REPORT.md 
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>echo ## Resultados de las pruebas  1>>REPORT.md 
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>echo Las pruebas se ejecutaron el 03-04-2025 21:00:36,77  1>>REPORT.md 
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>echo ### Detalles  1>>REPORT.md 
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>echo - Total de pruebas: 2  1>>REPORT.md 
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>echo - Pruebas exitosas: 2  1>>REPORT.md 
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>echo - Pruebas fallidas: 0  1>>REPORT.md 
+[Pipeline] archiveArtifacts
+Guardando archivos
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] echo
+Limpiando el entorno...
+[Pipeline] bat
+
+C:\ProgramData\Jenkins\.jenkins\workspace\jenk1>powershell -command "try { Get-Process -Name node | Where-Object {$_.CommandLine -like '*json-server*'} | Stop-Process -Force } catch { echo 'No hay instancias de json-server para terminar' }" 
+[Pipeline] echo
+Pipeline ejecutado correctamente: Todas las pruebas pasaron.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
